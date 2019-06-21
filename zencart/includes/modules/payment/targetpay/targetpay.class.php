@@ -20,6 +20,9 @@
 */
 class TargetPayCore
 {
+
+    const APP_ID = 'dw_zencart';
+
     const DEFAULT_RTLO = 93929;
 
     const API_NAME = 'Digiwallet';
@@ -317,6 +320,7 @@ class TargetPayCore
 
         // Startpayment Url builder
         $url = $this->startAPIs[$this->payMethod] . "?rtlo=" . urlencode($this->rtlo);
+        $url .= "&app_id=" . urlencode(self::APP_ID);
         $url .= "&bank=" . urlencode($this->bankId);
         $url .= "&amount=" . urlencode($this->amount);
         $url .= "&description=" . urlencode($this->description);
