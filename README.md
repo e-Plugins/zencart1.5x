@@ -1,8 +1,8 @@
-# iDEAL plugin for ZenCart
+# DigiWallet plugin for ZenCart
 
 ## Usage
 Use this plugin to add support for iDEAL, Mister Cash, Sofort and other payment methods of 
-digiwallet.nl to your webstore. 
+Digiwallet to your webstore. 
 
 ## Installation
 
