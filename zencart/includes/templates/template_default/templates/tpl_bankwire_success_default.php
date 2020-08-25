@@ -13,7 +13,7 @@ require_once(DIR_WS_CLASSES . 'payment.php');
 
 $availableLanguages = array("dutch","english");
 $langDir = (isset($_SESSION["language"]) && in_array($_SESSION["language"], $availableLanguages)) ? $_SESSION["language"] : "dutch";
-$ywincludefile = realpath(DIR_WS_LANGUAGES . $langDir . '/modules/payment/targetpay_ide.php');
+$ywincludefile = realpath(DIR_WS_LANGUAGES . $langDir . '/modules/payment/digiwallet_ide.php');
 require_once $ywincludefile;
 
 $transactionID = zen_db_input($_REQUEST['trxid']);
@@ -22,7 +22,7 @@ if(empty($transactionID)){
     // Redirect to index page
     $process_valid = false;
 }
-$result = $db->Execute("select * from " . TABLE_TARGETPAY_TRANSACTIONS . " where transaction_id = '{$transactionID}' and issuer_id = 'BW'");
+$result = $db->Execute("select * from " . TABLE_DIGIWALLET_TRANSACTIONS . " where transaction_id = '{$transactionID}' and issuer_id = 'BW'");
 if($result->count() < 1){
     // Redirect to index page
     $process_valid = false;
@@ -30,7 +30,7 @@ if($result->count() < 1){
 if($process_valid){
     if($result->fields['transaction_status'] == "success"){
         ?>
-        	<h2><?php echo MODULE_PAYMENT_TARGETPAY_BANKWIRE_THANKYOU_FINISHED;?></h2>
+        	<h2><?php echo MODULE_PAYMENT_DIGIWALLET_BANKWIRE_THANKYOU_FINISHED;?></h2>
         <?php 
     } else {
         list($trxid, $accountNumber, $iban, $bic, $beneficiary, $bank) = explode("|", $result->fields['more']);
@@ -63,7 +63,7 @@ if($process_valid){
                 $cus_email .= "*";
             }
         }
-        echo sprintf(MODULE_PAYMENT_TARGETPAY_BANKWIRE_THANKYOU_PAGE,                   
+        echo sprintf(MODULE_PAYMENT_DIGIWALLET_BANKWIRE_THANKYOU_PAGE,                   
                $currencies->display_price(((float) $result->fields['amount'])/100, 0),
                $iban,
                $beneficiary,
