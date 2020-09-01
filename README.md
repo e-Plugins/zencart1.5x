@@ -2,12 +2,12 @@
 
 ## Usage
 Use this plugin to add support for iDEAL, Mister Cash, Sofort and other payment methods of 
-Digiwallet to your webstore. 
+DigiWallet to your webstore. 
 
 ## Installation
 
-### 1. Set up a Digiwallet account
-Before you can use the plugin, please sign up for a Digiwallet account on https://digiwallet.nl
+### 1. Set up a DigiWallet account
+Before you can use the plugin, please sign up for a DigiWallet account on https://digiwallet.nl
 
 
 Note that the plugin can be used in a live environment only after it has been completed with your details and
