@@ -312,7 +312,7 @@ require(DIR_WS_INCLUDES . 'header.php');
                                             </tr>
                                             <tr>
                                                 <?php echo zen_draw_form('transactions', FILENAME_DIGIWALLET_TRANSACTIONS, '', 'get'); ?>
-                                                    <td class="smallText" align="center"><?php echo zen_draw_hidden_field('action', 'cleanup'); ?><input onClick="return confirm('Weet u zeker dat u de transatie tabel nu wilt opschonen?')" type="submit" value="<?php echo DIGIWALLET_TEXT_FILTER_CLEANUP; ?>" /><?php echo DIGIWALLET_TEXT_CLEANUP; ?></td>
+                                                    <td class="smallText" align="center"><?php echo zen_draw_hidden_field('action', 'cleanup'); ?><input onClick="return confirm('Weet u zeker dat u de transactie tabel nu wilt opschonen?')" type="submit" value="<?php echo DIGIWALLET_TEXT_FILTER_CLEANUP; ?>" /><?php echo DIGIWALLET_TEXT_CLEANUP; ?></td>
                                                 </form>
                                             </tr>
                                         </table>
@@ -537,7 +537,7 @@ foreach ($digiwallet_directorylist as $bankObj) {
 </ul>
 <?php
 } else {
-    echo '<span style="color: red">De lijst met banken is op dit moment leeg, gebruik de Digiwallet iDEAL betaalmodule (als klant) om een nieuwe lijst met banken op te halen van de Digiwallet iDEAL server.</span>';
+    echo '<span style="color: red">De lijst met banken is op dit moment leeg, gebruik de DigiWallet iDEAL betaalmodule (als klant) om een nieuwe lijst met banken op te halen van de DigiWallet iDEAL server.</span>';
 }
 ?>
 </div>

@@ -1,33 +1,35 @@
 <?php
 
 /**
- * @file     Provides support for Digiwallet iDEAL, Mister Cash and Sofort Banking
-* @author   Yellow Melon B.V.
-* @url      http://www.idealplugins.nl
-* @release  11-09-2014
-* @ver      2.4
-*
-* Changes:
-*
-* v2.1     Cancel url added
-* v2.2     Verify Peer disabled, too many problems with this
-* v2.3     Added paybyinvoice (achteraf betalen) and paysafecard (former Wallie)
-* v2.4     Removed IP_range and deprecated checkReportValidity . Because it is bad practice.
-*/
+ * @file     Provides support for Digiwallet iDEAL, Mister Cash and Sofort
+ * @author   Yellow Melon B.V.
+ * @url      http://www.idealplugins.nl
+ * @release  11-09-2014
+ * @ver      2.4
+ *
+ * Changes:
+ *
+ * v2.1     Cancel url added
+ * v2.2     Verify Peer disabled, too many problems with this
+ * v2.3     Added paybyinvoice (achteraf betalen) and paysafecard (former Wallie)
+ * v2.4     Removed IP_range and deprecated checkReportValidity . Because it is bad practice.
+ */
 
 /**
  * @class Digiwallet Core class
-*/
+ */
 class DigiwalletCore
 {
 
     const APP_ID = 'dw_zencart';
 
-    const DEFAULT_RTLO = 93929;
+    const DEFAULT_RTLO = 156187;
+
+    const DEFAULT_API_TOKEN = 'bf72755a648832f48f0995454';
 
     const API_NAME = 'Digiwallet';
 
-    const MESG_VERSION_REPORT = "(Zencart 1.5, 15-07-2019)";
+    const MESG_VERSION_REPORT = "(Zencart 1.5.7b, 15-07-2019)";
 
     const METHOD_SOFORT = "sofort";
 
@@ -44,8 +46,8 @@ class DigiwalletCore
 
     const ERR_AMOUNT_TOO_HIGH = "Bedrag is te hoog | Amount is too high";
 
-    const ERR_NO_RTLO = "Geen DigiWallet Outlet Identifier bekend; controleer de module instellingen | No Digiwallet Outlet Identifier filled in, check the module settings";
-    
+    const ERR_NO_RTLO = "Geen DigiWallet Outletcode bekend; controleer de module instellingen | No Digiwallet Outletcode filled in, check the module settings";
+
     const ERR_NO_TXID = "Er is een onjuist transactie ID opgegeven | An incorrect transaction ID was given";
 
     const ERR_NO_RETURN_URL = "Geen of ongeldige return URL | No or invalid return URL";
@@ -76,7 +78,7 @@ class DigiwalletCore
      *
      * a) 'IDE' + the bank ID's for iDEAL
      * b) 'MRC' for Mister Cash
-     * c) 'DEB' + countrycode for Sofort Banking, e.g. DEB49 for Germany
+     * c) 'DEB' + countrycode for Sofort, e.g. DEB49 for Germany
      */
     protected $minimumAmounts = array(
         "IDE" => 84,
@@ -213,7 +215,7 @@ class DigiwalletCore
     public function getBankList()
     {
         $url = "https://transaction.digiwallet.nl/api/idealplugins?ver=4&banklist=" . urlencode($this->payMethod);
-        
+
         $xml = $this->httpRequest($url);
         if (! $xml) {
             $banks_array["IDE0001"] = "Bankenlijst kon niet opgehaald worden bij Digiwallet, controleer of curl werkt!";
@@ -340,15 +342,15 @@ class DigiwalletCore
         $url .= (($this->payMethod == "AFP") ? "&ver=1" : "");
         $url .= (($this->payMethod == "IDE") ? "&ver=4&language=nl" : "");
         $url .= (($this->payMethod == "MRC") ? "&ver=2&lang=" . urlencode($this->getLanguage(array(
-            "NL",
-            "FR",
-            "EN"
-        ), "NL")) : "");
+                "NL",
+                "FR",
+                "EN"
+            ), "NL")) : "");
         $url .= (($this->payMethod == "DEB") ? "&ver=2&type=1&country=" . urlencode($this->countryId) . "&lang=" . urlencode($this->getLanguage(array(
-            "NL",
-            "EN",
-            "DE"
-        ), "DE")) : "");
+                "NL",
+                "EN",
+                "DE"
+            ), "DE")) : "");
 
         // Another parameter
         if (is_array($this->parameters)) {

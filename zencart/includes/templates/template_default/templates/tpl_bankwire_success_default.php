@@ -13,7 +13,7 @@ require_once(DIR_WS_CLASSES . 'payment.php');
 
 $availableLanguages = array("dutch","english");
 $langDir = (isset($_SESSION["language"]) && in_array($_SESSION["language"], $availableLanguages)) ? $_SESSION["language"] : "dutch";
-$ywincludefile = realpath(DIR_WS_LANGUAGES . $langDir . '/modules/payment/digiwallet_ide.php');
+$ywincludefile = realpath(DIR_WS_LANGUAGES . $langDir . '/modules/payment/digiwallet_a01_ide.php');
 require_once $ywincludefile;
 
 $transactionID = zen_db_input($_REQUEST['trxid']);

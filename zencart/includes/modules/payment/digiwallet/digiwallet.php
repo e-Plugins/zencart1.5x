@@ -1,19 +1,19 @@
 <?php
 /**
  * Digiwallet Payment Module for ZenCart
-*
-* @copyright Copyright 2013-2014 Yellow Melon
-* @copyright Portions Copyright 2013 Paul Mathot
-* @copyright Portions Copyright 2003 osCommerce
-* @license see LICENSE.TXT
-*/
+ *
+ * @copyright Copyright 2013-2014 Yellow Melon
+ * @copyright Portions Copyright 2013 Paul Mathot
+ * @copyright Portions Copyright 2003 osCommerce
+ * @license see LICENSE.TXT
+ */
 $ywincludefile = realpath(dirname(__FILE__) . '/../../../extra_datafiles/digiwallet.php');
 require_once ($ywincludefile);
 
 $availableLanguages = array("dutch","english");
 $langDir = (isset($_SESSION["language"]) && in_array($_SESSION["language"], $availableLanguages)) ? $_SESSION["language"] : "dutch";
 
-$ywincludefile = realpath(dirname(__FILE__) . '/../../../languages/' . $langDir . '/modules/payment/digiwallet_ide.php');
+$ywincludefile = realpath(dirname(__FILE__) . '/../../../languages/' . $langDir . '/modules/payment/digiwallet_a01_ide.php');
 require_once ($ywincludefile);
 
 $ywincludefile = realpath(dirname(__FILE__) . '/digiwallet.class.php');
@@ -34,7 +34,22 @@ class digiwalletBase extends base
         'IDE' => 'IDE',
         'PYP' => 'PYP',
         'BW' => 'BW',
-        'AFP' => 'AFP'
+        'AFP' => 'AFP',
+        'GIP' => 'GIP',
+        'EPS' => 'EPS'
+    );
+
+    protected $order_prefix = array(
+        'IDE' => 'a01',
+        'MRC' => 'a02',
+        'AFP' => 'a03',
+        'BW'  => 'a04',
+        'EPS' => 'a05',
+        'GIP' => 'a06',
+        'WAL' => 'a07',
+        'PYP' => 'a08',
+        'DEB' => 'a09',
+        'CC'  => 'a10',
     );
 
     public $cancelURL;
@@ -93,7 +108,7 @@ class digiwalletBase extends base
      */
     public function digiwallet()
     {
-        $this->code = 'digiwallet_' . strtolower($this->tpPaymentMethodId);
+        $this->code = 'digiwallet_' . $this->order_prefix[$this->tpPaymentMethodId] . "_" . strtolower($this->tpPaymentMethodId);
 
         $availableLanguages = array("dutch" => "nl", "english" => "en");
         $this->language = (isset($_SESSION["language"]) && in_array($_SESSION["language"], array_keys($availableLanguages))) ? $availableLanguages[$_SESSION["language"]] : "nl";
@@ -325,16 +340,21 @@ class digiwalletBase extends base
     {
         global $db;
 
+        $sort_order = array_search($this->tpPaymentMethodId, array_keys($this->order_prefix));
+        if(is_numeric($sort_order)) {
+            $sort_order = $sort_order + 1;
+        }
+
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Digiwallet payment module', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "STATUS', 'True', 'Do you want to accept Digiwallet payments?', '6', '1', 'zen_cfg_select_option(array(\'True\', \'False\'), ', now())");
-        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sortorder', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "SORT_ORDER', '0', 'Sort order of payment methods in list. Lowest is displayed first.', '6', '7', now())");
+        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sortorder', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "SORT_ORDER', '{$sort_order}', 'Sort order of payment methods in list. Lowest is displayed first.', '6', '7', now())");
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment zone', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "ZONE', '0', 'If a zone is selected, enable this payment method for that zone only.', '6', '3', 'zen_get_zone_class_title', 'zen_cfg_pull_down_zone_classes(', now())");
 
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Transaction description', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "TRANSACTION_DESCRIPTION', 'Automatic', 'Select automatic for product name as description, or manual to use the text you supply below.', '6', '8', 'zen_cfg_select_option(array(\'Automatic\',\'Manual\'), ', now())");
 
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Transaction description text', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "MERCHANT_TRANSACTION_DESCRIPTION_TEXT', '" . TITLE . "', 'Description of transactions from this webshop. <strong>Should not be empty!</strong>.', '6', '9', now())");
-        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Digiwallet Outlet Identifier', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "DIGIWALLET_RTLO', " . DigiwalletCore::DEFAULT_RTLO . " , 'The Digiwallet layout code', '6', '2', now())"); // Default Digiwallet
+        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Digiwallet Outletcode', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "DIGIWALLET_RTLO', " . DigiwalletCore::DEFAULT_RTLO . " , 'The Digiwallet Outletcode', '6', '2', now())"); // Default Digiwallet
 
-        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('DigiWallet API Token', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "DIGIWALLET_API_TOKEN', '' , 'The API Token is used for new authentication model and refunding function', '6', '3', now())");
+        $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('DigiWallet API Token', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "DIGIWALLET_API_TOKEN', '" . DigiwalletCore::DEFAULT_API_TOKEN . "' , 'You can obtain your token here: https://www.digiwallet.nl/nl/user/dashboard >> choose your Organization >> Developers', '6', '3', now())");
 
         /*
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Testaccount?', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "TESTACCOUNT', 'False', 'Enable testaccount (only for validation)?', '6', '6', 'zen_cfg_select_option(array(\'True\', \'False\'), ', now())");
@@ -396,7 +416,7 @@ class digiwalletBase extends base
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added)
             values ('Order status - open', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "ORDER_STATUS_ID_OPEN', '" . $open . "', 'The status of orders of which payment still inprogress.', '6', '5', 'zen_cfg_pull_down_order_statuses(', 'zen_get_order_status_name', now())");
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added)
-            values ('Order status - review', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "ORDER_STATUS_ID_REVIEW', '" . $review . "', 'The status of orders which paid by Bankwire.', '6', '6', 'zen_cfg_pull_down_order_statuses(', 'zen_get_order_status_name', now())");
+            values ('Order status - review', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "ORDER_STATUS_ID_REVIEW', '" . $review . "', 'The status of orders which paid by Bankwire - Overschrijving.', '6', '6', 'zen_cfg_pull_down_order_statuses(', 'zen_get_order_status_name', now())");
         $db->Execute("insert IGNORE into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added)
             values ('Order status - refund', 'MODULE_PAYMENT_DIGIWALLET" . $this->payType . "ORDER_STATUS_ID_REFUND', '" . $refund . "', 'The status of orders which have been refunded.', '6', '7', 'zen_cfg_pull_down_order_statuses(', 'zen_get_order_status_name', now())");
     }

@@ -13,18 +13,13 @@ require_once 'client/ClientCore.php';
 
 class digiwalletClient extends digiwalletBase
 {
-    protected $tpMethods = array(
-        'EPS' => 'EPS',
-        'GIP' => 'GIP',
-    );
-
     /**
      *
      * @method digiwallet inits the module
      */
     public function digiwallet()
     {
-        $this->code = 'digiwallet_' . strtolower($this->tpPaymentMethodId);
+        $this->code = 'digiwallet_' . $this->order_prefix[$this->tpPaymentMethodId] . "_" . strtolower($this->tpPaymentMethodId);
 
         $availableLanguages = array("dutch" => "nl", "english" => "en");
         $this->language = (isset($_SESSION["language"]) && in_array($_SESSION["language"], array_keys($availableLanguages))) ? $availableLanguages[$_SESSION["language"]] : "nl";

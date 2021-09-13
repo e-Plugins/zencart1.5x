@@ -2,8 +2,7 @@
 namespace Digiwallet;
 
 /**
- * @file Provides support for Digiwallet iDEAL, Mister Cash and Sofort Banking
- *
+ * @file Provides support for Digiwallet iDEAL, Mister Cash and Sofort 
  * @author e-plugins.nl.
  *         @url http://www.digiwallet.nl
  *         @release 29-09-2014
@@ -16,7 +15,7 @@ namespace Digiwallet;
  *         v2.3     Added paybyinvoice (achteraf betalen) and paysafecard (former Wallie)
  *         v2.4     Removed IP_range and deprecated checkReportValidity . Because it is bad practice.
  *         v2.5     Added creditcards by ATOS
- *         v2.5.3   fix multistore and bankwire outlet identifier
+ *         v2.5.3   fix multistore and bankwire Outletcode
  *         v2.5.4   fix Cannot load order
  *         v2.5.5   refactor to update authors name
  */
@@ -43,7 +42,7 @@ class ClientCore
 
     const ERR_NO_PAYMENT_METHOD = "Geen betalingsmethode meegegeven | No payment method given";
 
-    const ERR_NO_OUTLET_ID = "Geen DigiWallet Outlet Identifier bekend; controleer de module instellingen | No Digiwallet Outlet Identifier filled in, check the module settings";
+    const ERR_NO_OUTLET_ID = "Geen DigiWallet Outletcode bekend; controleer de module instellingen | No Digiwallet Outletcode filled in, check the module settings";
 
     const ERR_NO_API_TOKEN = "Geen DigiWallet API Token bekend; controleer de module instellingen | No Digiwallet API Token filled in, check the module settings";
 

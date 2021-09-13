@@ -10,7 +10,7 @@ require_once 'includes/functions/functions_general.php';
 $availableLanguages = array("dutch","english");
 $langDir = (isset($_SESSION["language"]) && in_array($_SESSION["language"], $availableLanguages)) ? $_SESSION["language"] : "dutch";
 
-$ywincludefile = realpath(dirname(__FILE__) . '/includes/languages/' . $langDir . '/modules/payment/digiwallet_ide.php');
+$ywincludefile = realpath(dirname(__FILE__) . '/includes/languages/' . $langDir . '/modules/payment/digiwallet_a01_ide.php');
 require_once $ywincludefile;
 
 if(!isset($_GET['method'])){
@@ -108,6 +108,15 @@ switch ($realstatus) {
             if($paymentIsPartial) {
                 $order->info['comments'] .= " - Overschrijvingen partial paid: " . number_format($bw_paid_amount / 100, 2);
             }
+
+            require(DIR_WS_MODULES . zen_get_module_directory('require_languages.php'));
+            if (!isset($_SESSION['language'])) $_SESSION['language'] = 'english';
+            if (file_exists(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . $template_dir_select . 'checkout_process.php')) {
+                require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/' . $template_dir_select . 'checkout_process.php');
+            } else {
+                require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/checkout_process.php');
+            }
+
             require(DIR_WS_CLASSES . 'order_total.php');
             $order_total_modules = new order_total;
 
@@ -135,11 +144,47 @@ switch ($realstatus) {
             $_SESSION['order_number_created'] = $order_id;
             $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_ORDER_CREATE_ADD_PRODUCTS');
             // Send email
-            $order->send_order_email($insert_id, 2);
+            $order->send_order_email($order_id, 2);
             $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_AFTER_SEND_ORDER_EMAIL');
             // set history status
             if (isset($_SESSION['payment_attempt'])) unset($_SESSION['payment_attempt']);
-            updateTransactionInfo($realstatus, $transactionID, $pay_type, $order_id, $order_success_status);
+
+            /**
+             * Calculate order amount for display purposes on checkout-success page as well as adword campaigns etc
+             * Takes the product subtotal and subtracts all credits from it
+             */
+            $ototal = $order_subtotal = $credits_applied = 0;
+            for ($i=0, $n=sizeof($order_totals); $i<$n; $i++) {
+                if ($order_totals[$i]['code'] == 'ot_subtotal') $order_subtotal = $order_totals[$i]['value'];
+                if (${$order_totals[$i]['code']}->credit_class == true) $credits_applied += $order_totals[$i]['value'];
+                if ($order_totals[$i]['code'] == 'ot_total') $ototal = $order_totals[$i]['value'];
+                if ($order_totals[$i]['code'] == 'ot_tax') $otax = $order_totals[$i]['value'];
+                if ($order_totals[$i]['code'] == 'ot_shipping') $oshipping = $order_totals[$i]['value'];
+            }
+            $commissionable_order = ($order_subtotal - $credits_applied);
+            $commissionable_order_formatted = $currencies->format($commissionable_order);
+            $_SESSION['order_summary']['order_number'] = $order_id;
+            $_SESSION['order_summary']['order_subtotal'] = $order_subtotal;
+            $_SESSION['order_summary']['credits_applied'] = $credits_applied;
+            $_SESSION['order_summary']['order_total'] = $ototal;
+            $_SESSION['order_summary']['commissionable_order'] = $commissionable_order;
+            $_SESSION['order_summary']['commissionable_order_formatted'] = $commissionable_order_formatted;
+            $_SESSION['order_summary']['coupon_code'] = urlencode($order->info['coupon_code']);
+            $_SESSION['order_summary']['currency_code'] = $order->info['currency'];
+            $_SESSION['order_summary']['currency_value'] = $order->info['currency_value'];
+            $_SESSION['order_summary']['payment_module_code'] = $order->info['payment_module_code'];
+            $_SESSION['order_summary']['shipping_method'] = $order->info['shipping_method'];
+            $_SESSION['order_summary']['orders_status'] = $order->info['orders_status'];
+            $_SESSION['order_summary']['tax'] = $otax;
+            $_SESSION['order_summary']['shipping'] = $oshipping;
+            $products_array = array();
+            foreach ($order->products as $key=>$val) {
+                $products_array[urlencode($val['id'])] = urlencode($val['model']);
+            }
+            $_SESSION['order_summary']['products_ordered_ids'] = implode('|', array_keys($products_array));
+            $_SESSION['order_summary']['products_ordered_models'] = implode('|', array_values($products_array));
+
+            updateTransactionInfo($objDigiCore, $realstatus, $transactionID, $pay_type, $order_id, $order_success_status);
             $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_HANDLE_AFFILIATES');
         }
         else {
