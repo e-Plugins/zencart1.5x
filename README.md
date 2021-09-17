@@ -1,7 +1,7 @@
 # DigiWallet plugin for ZenCart
 
 ## Usage
-Use this plugin to add support for iDEAL, Mister Cash, Sofort and other payment methods of 
+Use this plugin to add support for iDEAL, Bancontact, Sofort and other payment methods of 
 DigiWallet to your webstore. 
 
 ## Supported Paymethods
