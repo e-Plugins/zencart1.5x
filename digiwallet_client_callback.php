@@ -188,7 +188,7 @@ switch ($realstatus) {
             $_SESSION['order_summary']['products_ordered_ids'] = implode('|', array_keys($products_array));
             $_SESSION['order_summary']['products_ordered_models'] = implode('|', array_values($products_array));
 
-            updateTransactionInfo($objDigiCore, $realstatus, $transactionID, $pay_type, $order_id, $order_success_status);
+            updateTransactionInfo($realstatus, $transactionID, $pay_type, $order_id, $order_success_status);
             $zco_notifier->notify('NOTIFY_CHECKOUT_PROCESS_HANDLE_AFFILIATES');
         }
         else {
