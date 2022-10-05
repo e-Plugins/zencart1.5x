@@ -1,5 +1,6 @@
 <?php
 
+
 require 'includes/application_top.php';
 require_once(DIR_WS_CLASSES . 'order.php');
 require_once(DIR_WS_CLASSES . 'payment.php');
